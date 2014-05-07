@@ -8,10 +8,12 @@
 
 #include "CHttpRequest.h"
 #include "define.h"
+#include <sys/socket.h>
 
 using namespace std;
 
-CHttpRequest::CHttpRequest() {
+CHttpRequest::CHttpRequest(int tConnFd) {
+    connFd = tConnFd;
     connection = "Close";
     modifiedTime = "";
     fileStart = 0;
@@ -21,6 +23,7 @@ CHttpRequest::CHttpRequest() {
     fieldMap[TS_HTTP_HEADER_AUTHORIZATION] = &CHttpRequest::handleAuthorization;
     fieldMap[TS_HTTP_HEADER_RANGE] = &CHttpRequest::handleRange;
     fieldMap[TS_HTTP_HEADER_IF_MOD_SINCE] = &CHttpRequest::handleIfModSince;
+    fieldMap[TS_HTTP_HEADER_CONTENT_LENGTH] = &CHttpRequest::handleContentLength;
 }
 
 void CHttpRequest::handleRequest(char *header) {
@@ -57,6 +60,23 @@ void CHttpRequest::handleRequest(char *header) {
         }
         count++;
     }
+    
+    //if method is post, continue receiving data
+    if (method.compare(TS_HTTP_METHOD_POST_S)==0) {
+        long recvLen = 0;
+        while (recvLen<contentLength) {
+            //读取缓存
+            char buff[4096];
+            //读取http header
+            int len = (int)recv(connFd, buff, sizeof(buff), 0);
+            buff[len] = '\0';
+            std::cout<<buff;
+            if (len<0) {
+                break;
+            }
+            recvLen+=len;
+        }
+    }
 }
 
 void CHttpRequest::handleConnection(char *field) {
@@ -82,4 +102,8 @@ void CHttpRequest::handleRange(char *field) {
 
 void CHttpRequest::handleIfModSince(char *field) {
     modifiedTime = string(field);
+}
+
+void CHttpRequest::handleContentLength(char *field) {
+    contentLength = atol(field);
 }

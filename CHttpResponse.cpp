@@ -66,6 +66,9 @@ CHttpResponse::CHttpResponse(CHttpRequest *request) {
             m_statusMsg = TS_HTTP_STATUS_NOT_FOUND_S;
             m_sendStr = HTTP_RESPONSE_404;
         }
+    }else if (m_request->method.compare(TS_HTTP_METHOD_POST_S)==0) {
+        m_statusCode = TS_HTTP_STATUS_OK;
+        m_statusMsg = TS_HTTP_STATUS_OK_S;
     }
 }
 

@@ -53,7 +53,7 @@
 class CHttpRequest {
 public:
     std::map<std::string, void(CHttpRequest::*)(char*)> fieldMap;
-    
+
     std::string method;
     std::string path;
     std::string version;
@@ -63,14 +63,18 @@ public:
     std::string modifiedTime;
     long fileStart;
     long fileEnd;
+    long contentLength;
     
-    CHttpRequest();
+    CHttpRequest(int);
     void handleRequest(char *header);
 private:
+    int connFd;
+    
     void handleConnection(char *);
     void handleAuthorization(char *);
     void handleRange(char *);
     void handleIfModSince(char *);
+    void handleContentLength(char *);
 };
 
 #endif /* defined(__TSHttpServer__CHttpRequest__) */

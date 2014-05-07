@@ -100,7 +100,7 @@ bool handleRequest(int connFd) {
     buff[len] = '\0';
     std::cout<<buff<<std::endl;
 
-    CHttpRequest *httpRequest = new CHttpRequest();
+    CHttpRequest *httpRequest = new CHttpRequest(connFd);
     httpRequest->handleRequest(buff);
     CHttpResponse *httpResponse = new CHttpResponse(httpRequest);
     bool result = httpResponse->response(connFd);
